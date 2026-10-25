@@ -47,16 +47,25 @@
   .container { padding: 0 16px; margin-top: -30px; position: relative; z-index: 5; }
   .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 20px; }
   
+  /* FORM STYLES */
+  .form-title { font-size: 18px; font-weight: 800; margin-bottom: 5px; color: var(--text-main); }
+  .form-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; display: block; line-height: 1.4; }
   .input-group { margin-bottom: 20px; }
   .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
   .input-box { display: flex; align-items: center; background: var(--bg-body); border: 1px solid var(--border); border-radius: 10px; padding: 14px; gap: 10px; }
   .input-box input, .input-box select { border: none; background: transparent; width: 100%; font-size: 14px; font-weight: 500; outline: none; color: var(--text-main); }
+  .hint-text { font-size: 11px; color: var(--text-muted); font-weight: normal; margin-left: 5px; }
   
   /* Autocomplete */
   .autocomplete-wrapper { position: relative; width: 100%; }
   .autocomplete-items { position: absolute; border: 1px solid var(--border); border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: none; }
   .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 14px; }
   .autocomplete-items div:hover { background-color: var(--primary-light); color: var(--primary); }
+
+  /* QUICK DATE PILLS */
+  .date-pills { display: flex; gap: 8px; margin-top: 10px; }
+  .date-pill { flex: 1; padding: 8px 0; border-radius: 20px; border: 1px solid var(--border); background: white; color: var(--text-main); font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .date-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255,94,0,0.3); }
 
   .notice-box { background: #FEF2F2; border: 1px solid #F87171; border-left: 4px solid #EF4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
   .notice-box h4 { color: #991B1B; font-size: 14px; font-weight: 800; margin-bottom: 6px; }
@@ -105,7 +114,8 @@
   .payment-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; }
   .copy-btn { background: var(--primary-light); color: var(--primary); border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
 </style>
-</head><body>
+</head>
+<body>
 
 <!-- SCREEN 1: HOME -->
 <div id="screen-home" class="screen active">
@@ -141,50 +151,71 @@
         <p>To guarantee an agent is available to pick you up, and to ensure we have pre-selected the best 5 houses for you before you arrive. We do not allow walk-ins to save your time and ensure quality service.</p>
       </div>
 
+      <h3 class="form-title">Start Your Viewing Appointment</h3>
+      <p class="form-subtitle">Please fill in the details below. Our agent will pick you up and take you to view 5 houses.</p>
+
       <div class="input-group">
         <label>FULL NAME</label>
         <div class="input-box"><input type="text" id="fullName" placeholder="e.g. John Doe"></div>
       </div>
 
       <div class="input-group">
-        <label>PICKUP LOCATION</label>
+        <label>WHERE SHOULD THE AGENT PICK YOU UP?</label>
         <div class="input-box">
           <div class="autocomplete-wrapper">
-            <input type="text" id="pickupLocation" placeholder="Type estate, mall, or landmark" autocomplete="off">
+            <input type="text" id="pickupLocation" placeholder="Type your exact location or landmark" autocomplete="off">
             <div id="locationDropdown" class="autocomplete-items"></div>
           </div>
         </div>
       </div>
 
       <div class="input-group">
-        <label>NUMBER OF PEOPLE</label>
+        <label>NUMBER OF PEOPLE <span class="hint-text">(Seats needed in agent's vehicle)</span></label>
         <div class="input-box">
           <select id="peopleCount">
-            <option value="1">1 Person</option>
-            <option value="2">2 People</option>
-            <option value="3">3 People</option>
-            <option value="4">4 People</option>
+            <option value="1">1 Person (1 Seat)</option>
+            <option value="2">2 People (2 Seats)</option>
+            <option value="3">3 People (3 Seats)</option>
+            <option value="4">4 People (4 Seats)</option>
           </select>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <div class="input-group" style="margin-bottom: 0;">
-          <label>DATE</label>
-          <div class="input-box"><input type="date" id="viewingDate"></div>
+      <div class="input-group" style="margin-bottom: 10px;">
+        <label>PICKUP DATE</label>
+        <div class="input-box" style="padding: 10px 14px;">
+           <input type="date" id="viewingDate" style="font-size: 14px; width: 100%;">
         </div>
-        <div class="input-group" style="margin-bottom: 0;">
-          <label>TIME</label>
-          <div class="input-box"><input type="time" id="viewingTime"></div>
+        <div class="date-pills">
+          <button type="button" class="date-pill active" onclick="setQuickDate(0, this)">Today</button>
+          <button type="button" class="date-pill" onclick="setQuickDate(1, this)">Tomorrow</button>
+          <button type="button" class="date-pill" onclick="setQuickDate('friday', this)">Friday</button>
+          <button type="button" class="date-pill" onclick="setQuickDate('saturday', this)">Saturday</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>PICKUP TIME</label>
+        <div class="input-box">
+           <input type="time" id="viewingTime">
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>WHO DO YOU WANT TO MEET AT THE SITE?</label>
+        <div class="input-box">
+          <select id="meetingPreference">
+            <option value="House Agent">Meet the House Agent</option>
+            <option value="Landlord">Meet the Landlord</option>
+            <option value="Both (Agent & Landlord)">Meet Both (Agent & Landlord)</option>
+          </select>
         </div>
       </div>
 
       <button class="btn-primary" onclick="validateAndBook()">Proceed to Pay KES 1,000</button>
     </div>
   </div>
-</div>
-
-<!-- SCREEN 2: MY APPOINTMENTS -->
+</div><!-- SCREEN 2: MY APPOINTMENTS -->
 <div id="screen-appointments" class="screen">
   <header class="app-header">
     <div class="header-title"><h1>My Appointments</h1></div>
@@ -272,6 +303,7 @@
       <div class="row"><span>Name</span><span id="ticketName">John Doe</span></div>
       <div class="row"><span>Pickup</span><span id="ticketPickup">Westlands</span></div>
       <div class="row"><span>People</span><span id="ticketPeople">2</span></div>
+      <div class="row"><span>Meeting</span><span id="ticketMeeting">Landlord</span></div>
       <div class="row"><span>Date & Time</span><span id="ticketDateTime">24 Oct, 10:00 AM</span></div>
       
       <div class="divider"></div>
@@ -286,8 +318,16 @@
         </div>
       </div>
       
-      <div class="notice-box" style="margin-top: 16px; padding: 12px;">
-        <p style="font-size: 11px;">Ticket is valid only after payment is confirmed. Click the button below to send your confirmation via WhatsApp to the Agent.</p>
+      <!-- M-PESA TRANSACTION CODE -->
+      <div class="input-group" style="margin-top: 16px; margin-bottom: 10px;">
+        <label>M-PESA TRANSACTION CODE</label>
+        <div class="input-box" style="background: white; border-color: var(--primary);">
+          <input type="text" id="mpesaCode" placeholder="e.g. SJDK123XYZ" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">
+        </div>
+      </div>
+
+      <div class="notice-box" style="margin-top: 10px; padding: 12px;">
+        <p style="font-size: 11px;">Ticket is valid only after payment is confirmed. Enter your M-Pesa code and click the button below to send your confirmation via WhatsApp.</p>
       </div>
 
       <button class="btn-primary" style="background: #25D366; margin-top: 10px;" onclick="sendWhatsApp()">I have paid - Confirm on WhatsApp</button>
@@ -312,6 +352,24 @@
     slides[slideIndex].classList.add('active');
   }
   setInterval(showSlides, 3000); 
+
+  // Quick Date Selection
+  function setQuickDate(offset, btnElement) {
+    const d = new Date();
+    if (offset === 'friday') {
+      const day = d.getDay(); const diff = (5 - day + 7) % 7; d.setDate(d.getDate() + (diff === 0 ? 7 : diff)); 
+    } else if (offset === 'saturday') {
+      const day = d.getDay(); const diff = (6 - day + 7) % 7; d.setDate(d.getDate() + (diff === 0 ? 7 : diff)); 
+    } else { d.setDate(d.getDate() + offset); }
+
+    const yyyy = d.getFullYear(); const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
+    document.getElementById('viewingDate').value = `${yyyy}-${mm}-${dd}`;
+
+    document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+  }
+  
+  window.addEventListener('DOMContentLoaded', () => { setQuickDate(0, document.querySelector('.date-pill')); });
 
   // Load Locations
   fetch('locations.json').then(res => res.json()).then(data => {
@@ -401,6 +459,7 @@
       const people = document.getElementById('peopleCount').value;
       const date = document.getElementById('viewingDate').value;
       const time = document.getElementById('viewingTime').value;
+      const meeting = document.getElementById('meetingPreference').value;
 
       if (!name || !pickup || !date || !time) {
           alert("Please fill in all fields (Name, Pickup, Date, Time).");
@@ -409,7 +468,7 @@
 
       const ref = 'HSE' + Math.floor(10000 + Math.random() * 90000);
       
-      currentBooking = { ref, name, pickup, people, date, time, status: 'Pending' };
+      currentBooking = { ref, name, pickup, people, date, time, meeting, status: 'Pending' };
       
       let saved = JSON.parse(localStorage.getItem('enaHouseBookings')) || [];
       saved.push(currentBooking);
@@ -419,6 +478,7 @@
       document.getElementById('ticketName').innerText = name;
       document.getElementById('ticketPickup').innerText = pickup;
       document.getElementById('ticketPeople').innerText = people;
+      document.getElementById('ticketMeeting').innerText = meeting;
       document.getElementById('ticketDateTime').innerText = `${date} at ${time}`;
 
       await loadPaymentSettings();
@@ -428,7 +488,7 @@
       fetch(`${BACKEND_URL}/api/notify-viewing`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, pickup, people, date, time })
+          body: JSON.stringify({ name, pickup, people, date, time, meeting })
       }).catch(err => console.error("Telegram Error", err));
   }
 
@@ -452,6 +512,7 @@
           <div class="ticket-details">
             <p>👤 Name: <strong>${b.name}</strong></p>
             <p>📍 Pickup: <strong>${b.pickup}</strong> (${b.people} pax)</p>
+            <p>🤝 Meeting: <strong>${b.meeting}</strong></p>
             <p>📅 Date: <strong>${b.date} at ${b.time}</strong></p>
           </div>
         </div>
@@ -461,6 +522,13 @@
   // Send WhatsApp
   function sendWhatsApp() {
       if (!currentBooking) return;
+
+      const mpesaCode = document.getElementById('mpesaCode').value.trim().toUpperCase();
+      
+      if (!mpesaCode || mpesaCode.length < 8) {
+          alert("⚠️ Please enter a valid M-Pesa Transaction Code (e.g., SJDK123XYZ) to confirm your booking.");
+          return;
+      }
 
       let settings = globalPaymentSettings || { type: 'paybill', number: '756756', account: '1769003' };
       let paymentText = "";
@@ -479,12 +547,15 @@
           `*CUSTOMER DETAILS*\n` +
           `Name: ${currentBooking.name}\n` +
           `Pickup: ${currentBooking.pickup}\n` +
-          `People: ${currentBooking.people}\n` +
+          `People/Seats: ${currentBooking.people}\n` +
+          `Meeting Preference: *${currentBooking.meeting}*\n` +
           `Date/Time: ${currentBooking.date} at ${currentBooking.time}\n\n` +
-          `*TOTAL PAID*\nKES 1,000\n\n` +
+          `*PAYMENT DETAILS*\n` +
+          `M-Pesa Code: *${mpesaCode}*\n` +
+          `Amount: KES 1,000\n\n` +
           `${paymentText}\n\n` +
           `-----------------------------------\n` +
-          `I have completed the payment. Please confirm my viewing appointment.`;
+          `I have completed the payment. Please verify the code and confirm my viewing appointment.`;
 
       window.open('https://wa.me/254738264143?text=' + encodeURIComponent(text), '_blank');
       closeModal();
@@ -498,6 +569,7 @@
       document.getElementById('checkoutModal').style.display = 'none';
       document.getElementById('fullName').value = '';
       document.getElementById('pickupLocation').value = '';
+      document.getElementById('mpesaCode').value = '';
       showScreen('appointments');
   }
 </script>
