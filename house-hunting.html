@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>House Hunting Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #FF5E00;
+    --primary-light: #FFF0E6;
+    --text-main: #1A1A1A;
+    --text-muted: #6B7280;
+    --bg-body: #F9FAFB;
+    --border: #E5E7EB;
+    --success: #22C55E;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg-body); color: var(--text-main); padding-bottom: 70px; min-height: 100dvh; display: flex; flex-direction: column; }
+  
+  /* SCREEN MANAGEMENT */
+  .screen { display: none; animation: fadeIn 0.3s ease; flex: 1; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* HEADERS */
+  .app-header { background: white; padding: 15px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .header-title { display: flex; align-items: center; gap: 12px; }
+  .header-title img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
+  .header-title h1 { font-size: 20px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+  .header-title h1::before { content: ""; display: block; width: 4px; height: 20px; background: var(--primary); border-radius: 2px; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 20px; padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+  .nav-item.active { color: var(--primary); }
+  .nav-item svg { width: 22px; height: 22px; stroke-width: 2; stroke: currentColor; fill: none; }
+
+  /* SLIDESHOW HERO */
+  .slideshow-container { position: relative; width: 100%; height: 220px; overflow: hidden; border-radius: 0 0 20px 20px; background: #000; }
+  .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1s ease-in-out; }
+  .slide.active { opacity: 1; }
+  .slideshow-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 20px; z-index: 2; }
+  .slideshow-overlay h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .slideshow-overlay p { font-size: 14px; opacity: 0.9; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+
+  .container { padding: 0 16px; margin-top: -30px; position: relative; z-index: 5; }
+  .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 20px; }
+  
+  .input-group { margin-bottom: 20px; }
+  .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+  .input-box { display: flex; align-items: center; background: var(--bg-body); border: 1px solid var(--border); border-radius: 10px; padding: 14px; gap: 10px; }
+  .input-box input, .input-box select { border: none; background: transparent; width: 100%; font-size: 14px; font-weight: 500; outline: none; color: var(--text-main); }
+  
+  /* Autocomplete */
+  .autocomplete-wrapper { position: relative; width: 100%; }
+  .autocomplete-items { position: absolute; border: 1px solid var(--border); border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: none; }
+  .autocomplete-items div { padding: 14px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .autocomplete-items div:hover { background-color: var(--primary-light); color: var(--primary); }
+
+  .notice-box { background: #FEF2F2; border: 1px solid #F87171; border-left: 4px solid #EF4444; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+  .notice-box h4 { color: #991B1B; font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+  .notice-box p { color: #7F1D1D; font-size: 13px; line-height: 1.5; }
+
+  .why-book { background: #EFF6FF; border: 1px solid #93C5FD; border-left: 4px solid #3B82F6; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+  .why-book h4 { color: #1E3A8A; font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+  .why-book p { color: #1E40AF; font-size: 13px; line-height: 1.5; }
+
+  .btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 10px rgba(255,94,0,0.3); }
+
+  /* APPOINTMENTS SCREEN */
+  .ticket-card { background: white; border-radius: 12px; padding: 16px; margin: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
+  .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ticket-id { font-size: 14px; font-weight: 800; }
+  .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; background: #FEF3C7; color: #D97706; }
+  .ticket-details p { font-size: 13px; margin-bottom: 6px; color: var(--text-muted); }
+  .ticket-details strong { color: var(--text-main); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+
+  /* HELP & PROFILE SCREEN */
+  .menu-group { background: white; border-radius: 12px; padding: 16px; margin: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+  .menu-item { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); cursor: pointer; font-weight: 500; align-items: center;}
+  .menu-item:last-child { border-bottom: none; }
+  .profile-header { background: var(--primary); padding: 40px 20px; text-align: center; color: white; border-radius: 0 0 20px 20px; }
+  .profile-avatar { width: 80px; height: 80px; background: white; border-radius: 50%; margin: 0 auto 16px; display: flex; justify-content: center; align-items: center; font-size: 40px; color: var(--primary); overflow: hidden;}
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .help-btn { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; text-decoration: none; margin-bottom: 12px; font-weight: 700; }
+  .help-btn.wa { background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.3); color: #166534; }
+  .help-btn.call { background: rgba(255,94,0,0.1); border: 1px solid rgba(255,94,0,0.3); color: var(--primary); }
+  .help-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; }
+  .help-btn.wa .help-icon { background: #25D366; }
+  .help-btn.call .help-icon { background: var(--primary); }
+
+  /* MODAL */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+  .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 20px; overflow-y: auto; max-height: 90vh; padding: 0; }
+  .eticket-header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 20px 20px 0 0; }
+  .pending-badge { background: #FEF3C7; color: #D97706; font-size: 10px; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-top: 8px; text-transform: uppercase; }
+  .eticket-body { padding: 20px; }
+  .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+  .row span:first-child { color: var(--text-muted); }
+  .row span:last-child { font-weight: 700; }
+  .divider { border-top: 2px dashed var(--border); margin: 16px 0; }
+  .payment-box { background: var(--bg-body); border-radius: 12px; padding: 16px; border: 1px dashed var(--primary); }
+  .payment-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; }
+  .copy-btn { background: var(--primary-light); color: var(--primary); border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+</style>
+</head><body>
+
+<!-- SCREEN 1: HOME -->
+<div id="screen-home" class="screen active">
+  <header class="app-header">
+    <div class="header-title">
+      <img src="https://res.cloudinary.com/yvzp2mhd/image/upload/v1791538280/house-hunt/ijqq9ynaw8frnpun3ut0.jpg" alt="Logo">
+      <h1>House Hunting Services</h1>
+    </div>
+  </header>
+
+  <!-- SLIDESHOW -->
+  <div class="slideshow-container">
+    <div class="slideshow-overlay">
+      <h2>Find Your Dream Home</h2>
+      <p>Book a viewing and get picked up!</p>
+    </div>
+    <div class="slide active" style="background-image: url('https://res.cloudinary.com/yvzp2mhd/image/upload/v1791536878/house-hunt/i2consdskicr1h0npckg.jpg');"></div>
+    <div class="slide" style="background-image: url('https://res.cloudinary.com/yvzp2mhd/image/upload/v1791536879/house-hunt/xu3izz1bxdpi3lrbxsdp.jpg');"></div>
+    <div class="slide" style="background-image: url('https://res.cloudinary.com/yvzp2mhd/image/upload/v1791538280/house-hunt/ijqq9ynaw8frnpun3ut0.jpg');"></div>
+    <div class="slide" style="background-image: url('https://res.cloudinary.com/yvzp2mhd/image/upload/v1791536877/house-hunt/mju8sqt5b6ikfmxnjflm.jpg');"></div>
+    <div class="slide" style="background-image: url('https://res.cloudinary.com/yvzp2mhd/image/upload/v1791536878/house-hunt/qwly5ectmsvawkzepkps.jpg');"></div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="notice-box">
+        <h4>⚠️ VIEWING FEE: KES 1,000 ONLY</h4>
+        <p>This fee covers your transport (pickup & drop-off) and access to view <b>5 pre-selected houses</b> matching your criteria.</p>
+      </div>
+
+      <div class="why-book">
+        <h4>Why do I have to book an appointment?</h4>
+        <p>To guarantee an agent is available to pick you up, and to ensure we have pre-selected the best 5 houses for you before you arrive. We do not allow walk-ins to save your time and ensure quality service.</p>
+      </div>
+
+      <div class="input-group">
+        <label>FULL NAME</label>
+        <div class="input-box"><input type="text" id="fullName" placeholder="e.g. John Doe"></div>
+      </div>
+
+      <div class="input-group">
+        <label>PICKUP LOCATION</label>
+        <div class="input-box">
+          <div class="autocomplete-wrapper">
+            <input type="text" id="pickupLocation" placeholder="Type estate, mall, or landmark" autocomplete="off">
+            <div id="locationDropdown" class="autocomplete-items"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>NUMBER OF PEOPLE</label>
+        <div class="input-box">
+          <select id="peopleCount">
+            <option value="1">1 Person</option>
+            <option value="2">2 People</option>
+            <option value="3">3 People</option>
+            <option value="4">4 People</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <div class="input-group" style="margin-bottom: 0;">
+          <label>DATE</label>
+          <div class="input-box"><input type="date" id="viewingDate"></div>
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <label>TIME</label>
+          <div class="input-box"><input type="time" id="viewingTime"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="validateAndBook()">Proceed to Pay KES 1,000</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: MY APPOINTMENTS -->
+<div id="screen-appointments" class="screen">
+  <header class="app-header">
+    <div class="header-title"><h1>My Appointments</h1></div>
+  </header>
+  <div id="appointmentsList" style="padding-bottom: 20px;"></div>
+</div>
+
+<!-- SCREEN 3: HELP -->
+<div id="screen-help" class="screen">
+  <header class="app-header">
+    <div class="header-title"><h1>Help & Support</h1></div>
+  </header>
+  <div class="container" style="margin-top: 20px;">
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px; text-align: center;">Contact our House Tour Agent directly for assistance.</p>
+    
+    <a href="https://wa.me/254738264143" target="_blank" class="help-btn wa">
+      <div class="help-icon">💬</div>
+      <div><div style="font-size: 15px;">WhatsApp House Tour Agent</div><div style="font-size: 12px; font-weight: 400; opacity: 0.8;">0738 264 143</div></div>
+    </a>
+    
+    <a href="tel:+254738264143" class="help-btn call">
+      <div class="help-icon">📞</div>
+      <div><div style="font-size: 15px;">Call House Tour Agent</div><div style="font-size: 12px; font-weight: 400; opacity: 0.8;">0738 264 143</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- SCREEN 4: PROFILE -->
+<div id="screen-profile" class="screen">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <img src="https://res.cloudinary.com/yvzp2mhd/image/upload/v1791538280/house-hunt/ijqq9ynaw8frnpun3ut0.jpg" alt="Logo">
+    </div>
+    <h2 style="font-size: 22px; font-weight: 700;">House Hunting Services</h2>
+    <p style="opacity: 0.9; font-size: 14px;">Find Your Dream Home</p>
+  </div>
+  
+  <div class="menu-group">
+    <div class="menu-item" onclick="showScreen('appointments')">
+      <span>My Viewing Appointments</span> <span>❯</span>
+    </div>
+    <div class="menu-item" onclick="window.location.href='index.html'">
+      <span>Book a Bus Ticket (ENA Coach)</span> <span>❯</span>
+    </div>
+    <div class="menu-item" onclick="showScreen('help')">
+      <span>Contact Support</span> <span>❯</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="showScreen('home', this)" id="nav-home">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    <span>Home</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('appointments', this)" id="nav-appointments">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    <span>Appointments</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('help', this)" id="nav-help">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    <span>Help</span>
+  </div>
+  <div class="nav-item" onclick="showScreen('profile', this)" id="nav-profile">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+    <span>Profile</span>
+  </div>
+</div>
+
+<!-- E-TICKET MODAL -->
+<div class="modal-bg" id="checkoutModal">
+  <div class="modal-content">
+    <div class="eticket-header">
+      <h2>HOUSE HUNTING</h2>
+      <p>Viewing Appointment Ticket</p>
+      <div class="pending-badge">Pending Payment</div>
+    </div>
+    <div class="eticket-body">
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">BOOKING REF</div>
+        <div style="font-size: 22px; font-weight: 800; color: var(--primary);" id="ticketRef">HSE12345</div>
+      </div>
+      
+      <div class="row"><span>Name</span><span id="ticketName">John Doe</span></div>
+      <div class="row"><span>Pickup</span><span id="ticketPickup">Westlands</span></div>
+      <div class="row"><span>People</span><span id="ticketPeople">2</span></div>
+      <div class="row"><span>Date & Time</span><span id="ticketDateTime">24 Oct, 10:00 AM</span></div>
+      
+      <div class="divider"></div>
+      
+      <div class="payment-box">
+        <div class="payment-row"><span>Amount to Pay</span><span style="color: var(--primary);">KES 1,000</span></div>
+        <div class="payment-row"><span id="payMethodLabel">Paybill Number</span>
+          <div><span id="payMethodValue">756756</span> <button class="copy-btn" onclick="copyText(document.getElementById('payMethodValue').innerText)">Copy</button></div>
+        </div>
+        <div class="payment-row" id="payAccountRow"><span>Account Number</span>
+          <div><span id="payAccountValue">1769003</span> <button class="copy-btn" onclick="copyText(document.getElementById('payAccountValue').innerText)">Copy</button></div>
+        </div>
+      </div>
+      
+      <div class="notice-box" style="margin-top: 16px; padding: 12px;">
+        <p style="font-size: 11px;">Ticket is valid only after payment is confirmed. Click the button below to send your confirmation via WhatsApp to the Agent.</p>
+      </div>
+
+      <button class="btn-primary" style="background: #25D366; margin-top: 10px;" onclick="sendWhatsApp()">I have paid - Confirm on WhatsApp</button>
+      <button style="width: 100%; background: none; border: none; color: var(--text-muted); font-size: 13px; margin-top: 10px; cursor: pointer;" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BACKEND_URL = 'https://enacoach-frontend.onrender.com';
+  let ALL_LOCATIONS = [];
+  let globalPaymentSettings = null;
+  let currentBooking = null;
+
+  // SLIDESHOW LOGIC
+  let slideIndex = 0;
+  const slides = document.querySelectorAll('.slide');
+  function showSlides() {
+    slides.forEach(slide => slide.classList.remove('active'));
+    slideIndex++;
+    if (slideIndex >= slides.length) { slideIndex = 0; }
+    slides[slideIndex].classList.add('active');
+  }
+  setInterval(showSlides, 3000); 
+
+  // Load Locations
+  fetch('locations.json').then(res => res.json()).then(data => {
+      ALL_LOCATIONS = data.sort();
+      setupAutocomplete("pickupLocation", "locationDropdown");
+  }).catch(err => console.error("Error loading locations", err));
+
+  // Load Payment Settings
+  async function loadPaymentSettings() {
+      try {
+          const response = await fetch(`${BACKEND_URL}/api/settings`);
+          const settings = await response.json();
+          globalPaymentSettings = settings;
+          
+          const label = document.getElementById('payMethodLabel');
+          const value = document.getElementById('payMethodValue');
+          const accountRow = document.getElementById('payAccountRow');
+          const accountValue = document.getElementById('payAccountValue');
+
+          if (settings.type === 'paybill') {
+              label.innerText = 'Paybill Number';
+              value.innerText = settings.number;
+              accountRow.style.display = 'flex';
+              accountValue.innerText = settings.account;
+          } else if (settings.type === 'till') {
+              label.innerText = 'Till Number';
+              value.innerText = settings.number;
+              accountRow.style.display = 'none';
+          } else {
+              label.innerText = 'Phone Number';
+              value.innerText = settings.number;
+              accountRow.style.display = 'none';
+          }
+      } catch (error) { console.error("Failed to load settings", error); }
+  }
+
+  // Autocomplete Logic
+  function setupAutocomplete(inputId, dropdownId) {
+    const input = document.getElementById(inputId);
+    const dropdown = document.getElementById(dropdownId);
+
+    input.addEventListener('focus', function() { if (this.value.length === 0) renderDropdown(ALL_LOCATIONS, dropdown); });
+    input.addEventListener('input', function() {
+      const val = this.value.toLowerCase();
+      if (!val) { renderDropdown(ALL_LOCATIONS, dropdown); return; }
+      const filtered = ALL_LOCATIONS.filter(loc => loc.toLowerCase().includes(val));
+      renderDropdown(filtered, dropdown);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (e.target !== input && e.target !== dropdown) dropdown.style.display = 'none';
+    });
+
+    function renderDropdown(array, el) {
+      el.innerHTML = '';
+      if (array.length === 0) { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      array.forEach(loc => {
+        const div = document.createElement('div');
+        div.innerText = loc;
+        div.addEventListener('click', function() {
+          input.value = this.innerText;
+          el.style.display = 'none';
+        });
+        el.appendChild(div);
+      });
+    }
+  }
+
+  // Navigation Logic
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screenId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('nav-' + screenId).classList.add('active');
+    window.scrollTo(0,0);
+
+    if (screenId === 'appointments') {
+        renderAppointments();
+    }
+  }
+
+  // Validate and Show Ticket
+  async function validateAndBook() {
+      const name = document.getElementById('fullName').value.trim();
+      const pickup = document.getElementById('pickupLocation').value.trim();
+      const people = document.getElementById('peopleCount').value;
+      const date = document.getElementById('viewingDate').value;
+      const time = document.getElementById('viewingTime').value;
+
+      if (!name || !pickup || !date || !time) {
+          alert("Please fill in all fields (Name, Pickup, Date, Time).");
+          return;
+      }
+
+      const ref = 'HSE' + Math.floor(10000 + Math.random() * 90000);
+      
+      currentBooking = { ref, name, pickup, people, date, time, status: 'Pending' };
+      
+      let saved = JSON.parse(localStorage.getItem('enaHouseBookings')) || [];
+      saved.push(currentBooking);
+      localStorage.setItem('enaHouseBookings', JSON.stringify(saved));
+
+      document.getElementById('ticketRef').innerText = ref;
+      document.getElementById('ticketName').innerText = name;
+      document.getElementById('ticketPickup').innerText = pickup;
+      document.getElementById('ticketPeople').innerText = people;
+      document.getElementById('ticketDateTime').innerText = `${date} at ${time}`;
+
+      await loadPaymentSettings();
+      document.getElementById('checkoutModal').style.display = 'flex';
+
+      // Telegram Alert
+      fetch(`${BACKEND_URL}/api/notify-viewing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, pickup, people, date, time })
+      }).catch(err => console.error("Telegram Error", err));
+  }
+
+  // Render Appointments
+  function renderAppointments() {
+      const list = document.getElementById('appointmentsList');
+      let bookings = JSON.parse(localStorage.getItem('enaHouseBookings')) || [];
+      
+      if (bookings.length === 0) {
+          list.innerHTML = `<div class="empty-state"><div style="font-size: 40px; margin-bottom: 10px;">🏠</div><h3>No appointments found</h3><p>Book a house viewing to see it here.</p></div>`;
+          return;
+      }
+
+      bookings.reverse();
+      list.innerHTML = bookings.map(b => `
+        <div class="ticket-card">
+          <div class="ticket-header">
+            <div class="ticket-id">${b.ref}</div>
+            <div class="status-badge">${b.status}</div>
+          </div>
+          <div class="ticket-details">
+            <p>👤 Name: <strong>${b.name}</strong></p>
+            <p>📍 Pickup: <strong>${b.pickup}</strong> (${b.people} pax)</p>
+            <p>📅 Date: <strong>${b.date} at ${b.time}</strong></p>
+          </div>
+        </div>
+      `).join('');
+  }
+
+  // Send WhatsApp
+  function sendWhatsApp() {
+      if (!currentBooking) return;
+
+      let settings = globalPaymentSettings || { type: 'paybill', number: '756756', account: '1769003' };
+      let paymentText = "";
+      if (settings.type === 'paybill') {
+          paymentText = `*PAYMENT MADE VIA M-PESA PAYBILL*\nPaybill: ${settings.number}\nAccount: ${settings.account}`;
+      } else if (settings.type === 'till') {
+          paymentText = `*PAYMENT MADE VIA M-PESA TILL*\nTill Number: ${settings.number}`;
+      } else {
+          paymentText = `*PAYMENT MADE VIA M-PESA SEND MONEY*\nPhone: ${settings.number}`;
+      }
+
+      const text = 
+          `*HOUSE HUNTING SERVICES - CONFIRMATION*\n` +
+          `Ref: *${currentBooking.ref}*\n` +
+          `-----------------------------------\n\n` +
+          `*CUSTOMER DETAILS*\n` +
+          `Name: ${currentBooking.name}\n` +
+          `Pickup: ${currentBooking.pickup}\n` +
+          `People: ${currentBooking.people}\n` +
+          `Date/Time: ${currentBooking.date} at ${currentBooking.time}\n\n` +
+          `*TOTAL PAID*\nKES 1,000\n\n` +
+          `${paymentText}\n\n` +
+          `-----------------------------------\n` +
+          `I have completed the payment. Please confirm my viewing appointment.`;
+
+      window.open('https://wa.me/254738264143?text=' + encodeURIComponent(text), '_blank');
+      closeModal();
+  }
+
+  function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => alert(text + " copied!"));
+  }
+
+  function closeModal() {
+      document.getElementById('checkoutModal').style.display = 'none';
+      document.getElementById('fullName').value = '';
+      document.getElementById('pickupLocation').value = '';
+      showScreen('appointments');
+  }
+</script>
+</body>
+</html>
